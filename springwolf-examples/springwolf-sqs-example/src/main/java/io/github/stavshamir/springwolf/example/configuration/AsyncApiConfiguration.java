@@ -4,6 +4,7 @@ import com.asyncapi.v2.model.info.Info;
 import com.asyncapi.v2.model.server.Server;
 import io.github.stavshamir.springwolf.asyncapi.types.AmqpConsumerData;
 import io.github.stavshamir.springwolf.asyncapi.types.AmqpProducerData;
+import io.github.stavshamir.springwolf.asyncapi.types.SQSProducerData;
 import io.github.stavshamir.springwolf.configuration.AsyncApiDocket;
 import io.github.stavshamir.springwolf.configuration.EnableAsyncApi;
 import io.github.stavshamir.springwolf.example.dtos.AnotherPayloadDto;
@@ -37,7 +38,10 @@ public class AsyncApiConfiguration {
                 .url(String.format("%s:%s", amqpHost, amqpPort))
                 .build();
 
-        AmqpProducerData exampleProducer = AmqpProducerData.amqpProducerDataBuilder()
+        //TODO: finish
+        //SQSProducerData data = ;
+
+        /*AmqpProducerData exampleProducer = AmqpProducerData.amqpProducerDataBuilder()
                 .queueName("example-producer-channel")
                 .description("example-producer-channel-description")
                 .exchangeName("example-topic-exchange")
@@ -51,14 +55,14 @@ public class AsyncApiConfiguration {
                 .exchangeName("example-consumer-topic-exchange")
                 .routingKey("example-consumer-topic-routing-key")
                 .payloadType(AnotherPayloadDto.class)
-                .build();
+                .build();*/
 
         return AsyncApiDocket.builder()
                 .basePackage("io.github.stavshamir.springwolf.example.consumers")
                 .info(info)
                 .server("amqp", amqp)
-                .producer(exampleProducer)
-                .consumer(exampleManuallyDefinedConsumer)
+                //.producer(exampleProducer)
+                //.consumer(exampleManuallyDefinedConsumer)
                 .build();
     }
 
