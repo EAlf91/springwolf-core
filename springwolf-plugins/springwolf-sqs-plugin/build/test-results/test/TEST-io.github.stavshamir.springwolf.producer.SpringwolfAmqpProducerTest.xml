@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="io.github.stavshamir.springwolf.producer.SpringwolfAmqpProducerTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2022-10-10T16:04:43" hostname="DESKTOP-R0QH9SQ" time="0.931">
+  <properties/>
+  <testcase name="send_exchangeAndNoRoutingKey" classname="io.github.stavshamir.springwolf.producer.SpringwolfAmqpProducerTest" time="0.929"/>
+  <testcase name="send_defaultExchangeAndChannelNameAsRoutingKey" classname="io.github.stavshamir.springwolf.producer.SpringwolfAmqpProducerTest" time="0.0"/>
+  <testcase name="send_exchangeAndRoutingKeyFromBindings" classname="io.github.stavshamir.springwolf.producer.SpringwolfAmqpProducerTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
