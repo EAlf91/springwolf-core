@@ -2,9 +2,14 @@ package io.github.stavshamir.springwolf.example.configuration;
 
 import com.asyncapi.v2.model.info.Info;
 import com.asyncapi.v2.model.server.Server;
+import io.github.stavshamir.springwolf.asyncapi.DefaultAsyncApiSerializerService;
+import io.github.stavshamir.springwolf.asyncapi.types.SQSConsumerData;
+import io.github.stavshamir.springwolf.asyncapi.types.SQSProducerData;
 import io.github.stavshamir.springwolf.configuration.AsyncApiDocket;
 import io.github.stavshamir.springwolf.configuration.EnableAsyncApi;
 import io.github.stavshamir.springwolf.example.dtos.AnotherPayloadDto;
+import io.github.stavshamir.springwolf.example.dtos.ExamplePayloadDto;
+import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,53 +18,45 @@ import org.springframework.context.annotation.Configuration;
 @EnableAsyncApi
 public class AsyncApiConfiguration {
 
-    private final String amqpHost;
-    private final String amqpPort;
+    private final String sqs_queue = "url://sqs_endpoint";
 
-    public AsyncApiConfiguration(
-            @Value("${spring.rabbitmq.host}") String amqpHost,
-            @Value("${spring.rabbitmq.port}") int amqpPort) {
-        this.amqpHost = amqpHost;
-        this.amqpPort = String.valueOf(amqpPort);
-    }
 
     @Bean
     public AsyncApiDocket asyncApiDocket() {
         Info info = Info.builder()
                 .version("1.0.0")
-                .title("Springwolf example project - AMQP")
+                .title("Springwolf example project - SQS")
                 .build();
 
+
+
         Server amqp = Server.builder()
-                .protocol("amqp")
-                .url(String.format("%s:%s", amqpHost, amqpPort))
+                .protocol("sqs")
+                .url(String.format("%s", sqs_queue))
                 .build();
 
         //TODO: finish
-        //SQSProducerData data = ;
 
-        /*AmqpProducerData exampleProducer = AmqpProducerData.amqpProducerDataBuilder()
-                .queueName("example-producer-channel")
-                .description("example-producer-channel-description")
-                .exchangeName("example-topic-exchange")
-                .routingKey("example-topic-routing-key")
-                .payloadType(AnotherPayloadDto.class)
+
+        SQSConsumerData consumerData =SQSConsumerData.sqsConsumerDataBuilder()
+                .payloadType(ExamplePayloadDto.class)
+                .queueName("example-queue")
+                .description("handles example files from example-queue")
                 .build();
-/*
-        AmqpConsumerData exampleManuallyDefinedConsumer = AmqpConsumerData.amqpConsumerDataBuilder()
-                .queueName("example-manual-consumer-channel")
-                .description("example-manual-consumer-channel-description")
-                .exchangeName("example-consumer-topic-exchange")
-                .routingKey("example-consumer-topic-routing-key")
-                .payloadType(AnotherPayloadDto.class)
-                .build();*/
+
+        SQSProducerData producerData = SQSProducerData.sqsProducerDataBuilder()
+                .queueName("producer-queue")
+                .description("producer channel")
+                .build();
+
 
         return AsyncApiDocket.builder()
                 .basePackage("io.github.stavshamir.springwolf.example.consumers")
                 .info(info)
                 .server("amqp", amqp)
-                //.producer(exampleProducer)
-                //.consumer(exampleManuallyDefinedConsumer)
+
+                //.producer(producerData)
+                //.consumer(consumerData)
                 .build();
     }
 
