@@ -43,8 +43,8 @@ public class SpringwolfSQSProducer {
 
     private String getExchangeName(ChannelItem channelItem) {
         String exchange = "";
-        if (channelItem.getBindings() != null && channelItem.getBindings().containsKey("amqp")) {
-            AMQPChannelBinding channelBinding = (AMQPChannelBinding) channelItem.getBindings().get("amqp");
+        if (channelItem.getBindings() != null && channelItem.getBindings().containsKey("sqs")) {
+            AMQPChannelBinding channelBinding = (AMQPChannelBinding) channelItem.getBindings().get("sqs");
             if (channelBinding.getExchange() != null && channelBinding.getExchange().getName() != null) {
                 exchange = channelBinding.getExchange().getName();
             }
@@ -56,8 +56,8 @@ public class SpringwolfSQSProducer {
     private String getRoutingKey(ChannelItem channelItem) {
         String routingKey = "";
         Operation operation = channelItem.getSubscribe() != null ? channelItem.getSubscribe() : channelItem.getPublish();
-        if (operation != null && operation.getBindings() != null && operation.getBindings().containsKey("amqp")) {
-            AMQPOperationBinding operationBinding = (AMQPOperationBinding) operation.getBindings().get("amqp");
+        if (operation != null && operation.getBindings() != null && operation.getBindings().containsKey("sqs")) {
+            AMQPOperationBinding operationBinding = (AMQPOperationBinding) operation.getBindings().get("sqs");
             if (!CollectionUtils.isEmpty(operationBinding.getCc())) {
                 routingKey = operationBinding.getCc().get(0);
             }

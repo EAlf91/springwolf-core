@@ -31,6 +31,8 @@ dependencies {
 
     testCompile 'org.projectlombok:lombok:1.18.4'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.4'
+// https://mvnrepository.com/artifact/io.awspring.cloud/spring-cloud-aws-dependencies
+  //  implementation group: 'io.awspring.cloud', name: 'spring-cloud-aws-dependencies', version: '3.0.0-M2', ext: 'pom'
 
     testCompile('org.assertj:assertj-core:3.11.1')
 }

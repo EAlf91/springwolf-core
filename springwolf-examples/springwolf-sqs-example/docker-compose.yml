@@ -1,19 +1,16 @@
-version: '3'
+version: "3.8"
 services:
-  app:
-    image: stavshamir/springwolf-amqp-example:0.4.0
-    links:
-      - amqp
+  localstack:
+    image: localstack/localstack:0.14.0
     ports:
-      - "8080:8080"
-    depends_on:
-      - amqp
+      - "4566:4566"
+    environment:
+      SERVICES: sqs,sns
+      DEFAULT_REGION: eu-central-1
 
-  amqp:
-    image: rabbitmq:3.8-management-alpine
+  postgres:
+    image: postgres:12-alpine
     ports:
-      # AMQP protocol port
-      - '5672:5672'
-      # HTTP management UI
-      - '15672:15672'
-
+      - "5441:5432"
+    environment:
+      POSTGRES_PASSWORD: someLocalPassword

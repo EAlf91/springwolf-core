@@ -1,0 +1,127 @@
+#!/usr/bin/env bash
+
+set -e
+
+SCRIPT_DIR="$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+export AWS_PAGER=""
+
+## HELP: ./go start_env
+## will start the database and localstack for local development
+go_start_env(){
+    docker-compose up -d
+    sleep 2
+    export DEFAULT_REGION=eu-central-1
+    awslocal sqs create-queue --queue-name "example-queue"
+    awslocal sqs create-queue --queue-name "another-queue"
+    awslocal sns create-topic --name "dunning-status-information-local"
+    awslocal sns create-topic --name "dunning-stop-status-local"
+    awslocal sns create-topic --name "dunning-closed-information-local"
+    awslocal sns create-topic --name "dunning-communication-local"
+
+    awslocal sns subscribe --topic-arn arn:aws:sns:eu-central-1:000000000000:dunning-communication-local \
+      --protocol sqs --notification-endpoint http://localhost:4566/000000000000/comm_queue_local
+    awslocal sns subscribe --topic-arn arn:aws:sns:eu-central-1:000000000000:dunning-status-information-local \
+      --protocol sqs --notification-endpoint http://localhost:4566/000000000000/dunning_status_update_queue_local
+}
+
+## HELP: ./go stop_env
+## will stop the local environment
+go_stop_env(){
+    docker-compose stop
+}
+
+## HELP: ./go destroy_env
+## will destroy the local environment (clearing database)
+go_destroy_env(){
+    docker-compose down
+}
+
+## HELP: ./go send_message [claim_created, handoff, debtor_created] [dpd: only for handoff]
+## will send an example claim_created or handoff message
+go_send_message(){
+  export DEFAULT_REGION=eu-central-1
+  if [[ "$1" == "" ]]; then
+    echo "You must specify an event type." >&2
+    exit 1
+  fi
+
+  local queue
+  local event_json
+  local queue_url
+  local dpd
+  case $1 in
+      "claim_created")
+          queue="dunning_claim_created_queue_local"
+          ;;
+      "debtor_created")
+          queue="debtor_management_queue_local"
+          ;;
+      "handoff")
+          queue="idl_handoff_queue_local"
+          if [[ "$2" == "" ]]; then
+            echo "You must specify a dpd number for a handoff message" >&2
+            exit 1
+          fi
+          dpd="$2"
+          ;;
+      "loan_delq_status_change")
+          queue="loan_delq_status_change_queue_local"
+          ;;
+      *)
+          echo "unknown event type $1" >&2
+          exit 1
+          ;;
+  esac
+  event_json=$(cat "${SCRIPT_DIR}/cli/example_$1.json")
+  if [[ "${dpd}" != "" ]]; then
+    event_json=${event_json/"<DPD_PLACEHOLDER>"/"$dpd"}
+  fi
+  queue_url=$(awslocal sqs get-queue-url --queue-name "${queue}" | jq -r ".QueueUrl")
+  awslocal sqs send-message --queue-url "$queue_url" --message-body "$event_json"
+}
+
+
+## HELP: ./go fetch_messages [communication, dunning_status]
+## Fetch available messages in SQS queue subscribed to topic
+go_fetch_messages(){
+  if [[ "$1" == "" ]]; then
+    echo "You must specify a message type." >&2
+    exit 1
+  fi
+
+  local queue
+  local queue_url
+  if [[ "$1" == "communication" ]]; then
+    queue="comm_queue_local"
+  elif [[ "$1" == "dunning_status" ]]; then
+    queue="dunning_status_update_queue_local"
+  fi
+  queue_url=$(aws --endpoint-url http://localhost:4566 sqs get-queue-url --queue-name "${queue}" | jq -r ".QueueUrl")
+  awslocal sqs receive-message --queue-url $queue_url | jq -r ".Messages[0].Body" | jq
+}
+
+go_help(){
+    local help
+    help=$(sed -n -e '/^## /p' "${SCRIPT_DIR}/go")
+    local withoutHELP=${help//## HELP: /  }
+    local withSecondLines=${withoutHELP//## /      }
+    echo "./go [sub command]"
+    echo ""
+    echo "${withSecondLines}"
+}
+
+subcommand=$1
+case $subcommand in
+    "" | "-h" | "--help")
+        go_help
+        ;;
+    *)
+        shift
+        go_${subcommand} $@
+        if [ $? = 127 ]; then
+            echo "Error: '${subcommand}' is not a known subcommand." >&2
+            echo "       Run './go --help' for a list of known subcommands." >&2
+            exit 1
+        fi
+        ;;
+esac
