@@ -10,12 +10,16 @@ import io.github.stavshamir.springwolf.configuration.EnableAsyncApi;
 import io.github.stavshamir.springwolf.example.dtos.AnotherPayloadDto;
 import io.github.stavshamir.springwolf.example.dtos.ExamplePayloadDto;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.util.Map;
+
 @Configuration
 @EnableAsyncApi
+@Slf4j
 public class AsyncApiConfiguration {
 
     private final String sqs_queue = "url://sqs_endpoint";
@@ -24,40 +28,19 @@ public class AsyncApiConfiguration {
     @Bean
     public AsyncApiDocket asyncApiDocket() {
         Info info = Info.builder()
-                .version("1.0.0")
-                .title("Springwolf example project - SQS")
+                .version("v1")
+                .title("Customer and Partner Communication Service Messages API")
+                .description(" The Customer and Partner Communication API allows product teams at Otto Payments to communicate with customers and partners.")
                 .build();
-
-
-
-        Server amqp = Server.builder()
-                .protocol("sqs")
-                .url(String.format("%s", sqs_queue))
-                .build();
-
-        //TODO: finish
-
-
-        SQSConsumerData consumerData =SQSConsumerData.sqsConsumerDataBuilder()
-                .payloadType(ExamplePayloadDto.class)
-                .queueName("example-queue")
-                .description("handles example files from example-queue")
-                .build();
-
-        SQSProducerData producerData = SQSProducerData.sqsProducerDataBuilder()
-                .queueName("producer-queue")
-                .description("producer channel")
-                .build();
-
 
         return AsyncApiDocket.builder()
                 .basePackage("io.github.stavshamir.springwolf.example.consumers")
                 .info(info)
-                .server("amqp", amqp)
-
+                .servers(ServerConfiguration.configure())
                 //.producer(producerData)
                 //.consumer(consumerData)
                 .build();
+
     }
 
 }

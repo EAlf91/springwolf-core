@@ -38,7 +38,7 @@ public class ExamplePayloadDto {
     }
 
     enum ExampleEnum {
-        FOO1, FOO2, FOO3
+        FOO1, FOO2, FOO3, FOO4
     }
 
     @Override

@@ -15,7 +15,6 @@ public class SQSConfiguration {
 
     @Bean(name = "amazonSQSAsync")
     @Primary
-    @Profile("local")
     public AmazonSQSAsync amazonSQSAsyncLocal() {
         return AmazonSQSAsyncClientBuilder.standard()
                 .withCredentials(new AWSStaticCredentialsProvider(new BasicAWSCredentials("", "")))

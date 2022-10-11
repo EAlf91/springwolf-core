@@ -1,8 +1,10 @@
 package io.github.stavshamir.springwolf.example.dtos;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Getter;
 
 @Schema(description = "Another payload model")
+@Getter
 public class AnotherPayloadDto {
 
     @Schema(description = "Foo field", example = "bar")
@@ -15,6 +17,9 @@ public class AnotherPayloadDto {
         return foo;
     }
 
+    @Schema(description = "Some enum field", example = "FOO2", required = true)
+    private AnotherPayloadDto.Events someEnum;
+
     public void setFoo(String foo) {
         this.foo = foo;
     }
@@ -25,6 +30,14 @@ public class AnotherPayloadDto {
 
     public void setExample(ExamplePayloadDto example) {
         this.example = example;
+    }
+
+    public AnotherPayloadDto.Events getSomeEnum() {
+        return someEnum;
+    }
+    enum Events {
+        EVENT_1,
+        EVENT_2
     }
 
     @Override

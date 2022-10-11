@@ -78,7 +78,7 @@ public class SQSChannelsScanner extends AbstractChannelScanner<SqsListener>
     @Override
     protected Map<String, ? extends ChannelBinding> buildChannelBinding(SqsListener annotation) {
 
-        return ImmutableMap.of("sqs", new SQSChannelBinding());
+        return ImmutableMap.of("sqs", new SQSCustomChannelBinding());
     }
 
     private String getExchangeName(SqsListener annotation) {
@@ -98,7 +98,8 @@ public class SQSChannelsScanner extends AbstractChannelScanner<SqsListener>
 
     @Override
     protected Map<String, ? extends OperationBinding> buildOperationBinding(SqsListener annotation) {
-        return ImmutableMap.of("sqs", new SQSOperationBinding());
+
+        return ImmutableMap.of("sqs", new SQSCustomOperationBinding("test"));
     }
 
     /*private List<String> getRoutingKeys(SqsListener annotation) {
